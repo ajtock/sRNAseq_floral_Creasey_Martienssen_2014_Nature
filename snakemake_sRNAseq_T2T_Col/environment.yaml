@@ -1,0 +1,11 @@
+channels:
+  - bioconda
+dependencies:
+  - pandas
+  - bbmap=38.22
+  - cutadapt
+  - bowtie=1
+  - fastqc
+  - multiqc
+  - samtools
+  - deeptools
