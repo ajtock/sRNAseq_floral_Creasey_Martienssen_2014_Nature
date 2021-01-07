@@ -55,7 +55,7 @@ elif mode == "both":
 else:
     bowtie_params = ""
 
-#ruleorder: fastqc_R1_raw > bbduk > cutadapt > fastqc_R1_trimmed > bowtie > sRNAsize_extract > postmapping > calc_coverage > calc_coverage_genome > postmapping_sRNAsize > calc_coverage_sRNAsize > calc_coverage_genome_sRNAsize > bin_bedgraphTPM > bedGraphToBigWig
+#ruleorder: fastqc_R1_raw > bbduk > cutadapt > fastqc_R1_trimmed > bowtie > sRNAsize_extract > postmapping > calc_coverage > calc_coverage_genome > postmapping_sRNAsize > calc_coverage_sRNAsize > calc_coverage_genome_sRNAsize > bin_bedgraphTPM > bedGraphToBigWig > genomeBin_bedgraphTPM
 
 # Specify the desired end target file(s)
 rule all:
@@ -126,7 +126,13 @@ rule all:
                mode = mode,
                sample = samples,
                refbase = refbase,
-               sRNAsizes = sRNAsizes)
+               sRNAsizes = sRNAsizes),
+        expand("mapped/{mode}/tsv/{sample}_MappedOn_{refbase}_{mode}_{longest}nt_sort_TPM_binSize{genomeBinName}.tsv",
+               mode = mode,
+               sample = samples,
+               refbase = refbase,
+               longest = sRNAsizes[len(sRNAsizes)-1],
+               genomeBinName = genomeBinName)
 
 # Run fastqc on R1 raw data
 rule fastqc_R1_raw:
@@ -522,3 +528,25 @@ rule bedGraphToBigWig:
         "(bedGraphToBigWig {input}"
         " data/index/{refbase}.fa.sizes"
         " {output}) &> {log}"
+
+# Use R script genomeBin_bamTPM_sRNAsizes.R to calculate per-window TPM and output as tsv
+rule genomeBin_bedgraphTPM:
+    """TPM-normalize broad-scale coverage for each sRNA size class"""
+    input:
+        "mapped/{mode}/{sample}_MappedOn_{refbase}_{mode}_sort.bam"
+    output:
+        ["".join (map (str, x)) for x in zip (
+         ["mapped/{mode}/tsv/{sample}_MappedOn_{refbase}_{mode}_"]*len(sRNAsizes),
+         sRNAsizes,
+         ["nt_sort_TPM_binSize" + genomeBinName + ".tsv"]*len(sRNAsizes))
+        ]
+    params:
+        genomeBinSize = config["COVERAGE"]["genomeBinSize"]
+    log:
+        "logs/genomeBin_bedgraphTPM/{sample}_MappedOn_{refbase}_{mode}_sRNAsizes_sort_TPM_genomeBin" + genomeBinName + "_bedgraph.log"
+    shell:
+       "(scripts/genomeBin_bamTPM_sRNAsizes.R"
+       " {wildcards.sample}"
+       " {refbase}"
+       " {mode}"
+       " {params.genomeBinSize}) &> {log}"
