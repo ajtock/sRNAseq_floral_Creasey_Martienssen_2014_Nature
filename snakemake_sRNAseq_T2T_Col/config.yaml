@@ -1,13 +1,11 @@
 SAMPLES:
-      ["Col_0_sRNA_SRR1042171",
-       "ddm1_2_sRNA_SRR1042172"]
 #      ["Col_0_sRNA_SRR1042171",
 #       "ddm1_2_sRNA_SRR1042172",
 #       "rdr6_15_sRNA_SRR1042173",
 #       "ddm1_2_rdr6_15_sRNA_SRR1042174"]
 #      ["s6_ddm1_2_dcl1_11_sRNA_SRR1042175",
-#       "s7_Col_0_sRNA_SRR1042176",
-#       "s8_ddm1_2_sRNA_SRR1042177",
+      ["s7_Col_0_sRNA_SRR1042176",
+       "s8_ddm1_2_sRNA_SRR1042177"]
 #       "s9_ddm1_2_dcl1_11_sRNA_SRR1042178"]
 THREADS: 48
 MEMORY: "500g"
